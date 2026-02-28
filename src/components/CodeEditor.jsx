@@ -8,6 +8,7 @@ const CodeEditor = ({
   errorLines = [],
   selectedError = null,
   allowDrop,
+  readOnly
 }) => {
   const textareaRef = useRef(null);
   const lineNumbersRef = useRef(null);
@@ -47,6 +48,9 @@ const CodeEditor = ({
     return "line-number";
   };
 
+  const dropRelatedAttr = allowDrop?{onDragOver:(e) => handleDragOver(e),
+        onDrop:(e) => handleDrop(e)}:{};
+
   return (
     <div className="code-editor">
       <div className="line-numbers" ref={lineNumbersRef}>
@@ -61,11 +65,11 @@ const CodeEditor = ({
         className="code-textarea"
         value={value}
         onChange={(e) => onChange(e.target.value)}
-        onDragOver={(e) => handleDragOver(e)}
-        onDrop={(e) => handleDrop(e)}
+        {...dropRelatedAttr}
         onScroll={handleScroll}
         placeholder={placeholder}
         spellCheck={false}
+        readOnly={readOnly}
       />
     </div>
   );

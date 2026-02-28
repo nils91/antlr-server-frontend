@@ -291,6 +291,7 @@ function App() {
             value={grammarText}
             onChange={handleGrammarChange}
             placeholder="Enter your ANTLR grammar here..."
+            allowDrop
           />
         </div>
 
@@ -302,6 +303,7 @@ function App() {
             placeholder="Enter input to parse..."
             errorLines={errorLines}
             selectedError={selectedError}
+            allowDrop
           />
           <div className="input-controls">
             <input
