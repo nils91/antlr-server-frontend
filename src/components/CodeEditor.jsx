@@ -1,14 +1,21 @@
-import React, { useRef, useEffect, useState } from 'react';
-import './CodeEditor.css';
+import React, { useRef, useEffect, useState } from "react";
+import "./CodeEditor.css";
 
-const CodeEditor = ({ value, onChange, placeholder, errorLines = [], selectedError = null }) => {
+const CodeEditor = ({
+  value,
+  onChange,
+  placeholder,
+  errorLines = [],
+  selectedError = null,
+  allowDrop,
+}) => {
   const textareaRef = useRef(null);
   const lineNumbersRef = useRef(null);
   const [lineCount, setLineCount] = useState(1);
 
   useEffect(() => {
-    const lines = value.split('\n').length;
-    setLineCount(lines);
+    const lines = value.split("\n").length;
+    setLineCount(value);
   }, [value]);
 
   const handleScroll = () => {
@@ -17,13 +24,27 @@ const CodeEditor = ({ value, onChange, placeholder, errorLines = [], selectedErr
     }
   };
 
+  const handleDragOver = (e) => {
+    e.preventDefault(); // Prevent browser from opening file directly
+  };
+
+  const handleDrop = (e) => {
+    e.preventDefault();
+    const file = e.dataTransfer.files[0];
+    const reader = new FileReader();
+    reader.onload = (event) => {
+      onChange(event.target.result);
+    };
+    reader.readAsText(file);
+  };
+
   const getLineClassName = (lineNumber) => {
     const hasError = errorLines.includes(lineNumber);
     const isSelected = selectedError && selectedError.line === lineNumber;
-    
-    if (isSelected) return 'line-number error-selected';
-    if (hasError) return 'line-number error-line';
-    return 'line-number';
+
+    if (isSelected) return "line-number error-selected";
+    if (hasError) return "line-number error-line";
+    return "line-number";
   };
 
   return (
@@ -40,6 +61,8 @@ const CodeEditor = ({ value, onChange, placeholder, errorLines = [], selectedErr
         className="code-textarea"
         value={value}
         onChange={(e) => onChange(e.target.value)}
+        onDragOver={(e) => handleDragOver(e)}
+        onDrop={(e) => handleDrop(e)}
         onScroll={handleScroll}
         placeholder={placeholder}
         spellCheck={false}
