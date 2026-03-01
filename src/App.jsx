@@ -313,6 +313,7 @@ function App() {
               value={startRule}
               onChange={(e) => setStartRule(e.target.value)}
               placeholder="Start rule..."
+              disabled={(!grammarText||grammarText==="")}
             />
             <ActionButton
               onClick={() => performParse(false)}
