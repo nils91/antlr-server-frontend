@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useRef } from "react";
+import { Group, Panel, Separator } from "react-resizable-panels";
 import Header from "./components/Header";
 import CodeEditor from "./components/CodeEditor";
 import InputParseControls from "./components/InputParseControls";
@@ -284,46 +285,51 @@ function App() {
         compileStatus={compileStatus}
         onDelete={handleDeleteGrammar}
       />
-
-      <div className="main-content">
-        <div className="editor-panel">
-          <div className="panel-header">Grammar</div>
-          <CodeEditor
-            value={grammarText}
-            onChange={handleGrammarChange}
-            placeholder="Enter your ANTLR grammar here..."
-            allowDrop
+      <Group className="min-h-30" orientation="vertical">
+        <Panel defaultSize="80%">
+          <Group orientation="horizontal" className="main-content">
+            <Panel defaultSize="50%" className="editor-panel">
+              <div className="panel-header">Grammar</div>
+              <CodeEditor
+                value={grammarText}
+                onChange={handleGrammarChange}
+                placeholder="Enter your ANTLR grammar here..."
+                allowDrop
+              />
+            </Panel>
+            <Separator />
+            <Panel defaultSize="50%" className="editor-panel">
+              <div className="panel-header">Input</div>
+              <CodeEditor
+                value={inputText}
+                onChange={handleInputChange}
+                placeholder="Enter input to parse..."
+                errorLines={errorLines}
+                selectedError={selectedError}
+                allowDrop
+                disabled={!grammarText || grammarText === ""}
+              />
+              <InputParseControls
+                startRule={startRule}
+                onStartRuleChange={setStartRule}
+                performParse={performParse}
+                autoParse={autoParse}
+                onAutoParseChange={setAutoParse}
+                disabled={!grammarText || grammarText === ""}
+              />
+            </Panel>
+          </Group>
+        </Panel>
+        <Separator />
+        <Panel defaultSize="20%">
+          <Footer
+            errors={errors}
+            lispTree={lispTree}
+            svgTree={svgTree}
+            onErrorSelect={setSelectedError}
           />
-        </div>
-
-        <div className="editor-panel">
-          <div className="panel-header">Input</div>
-          <CodeEditor
-            value={inputText}
-            onChange={handleInputChange}
-            placeholder="Enter input to parse..."
-            errorLines={errorLines}
-            selectedError={selectedError}
-            allowDrop
-            disabled={!grammarText || grammarText === ""}
-          />
-          <InputParseControls
-            startRule={startRule}
-            onStartRuleChange={setStartRule}
-            performParse={performParse}
-            autoParse={autoParse}
-            onAutoParseChange={setAutoParse}
-            disabled={!grammarText || grammarText === ""}
-          />
-        </div>
-      </div>
-
-      <Footer
-        errors={errors}
-        lispTree={lispTree}
-        svgTree={svgTree}
-        onErrorSelect={setSelectedError}
-      />
+        </Panel>
+      </Group>
     </div>
   );
 }

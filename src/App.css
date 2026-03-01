@@ -31,6 +31,28 @@
   padding: 0 var(--spacing-sm);
 }
 
+[data-separator] { /*Separator for resizable-panels*/
+  background: #444;
+  cursor: col-resize;
+  border-radius: 2px;
+}
+[data-separator][aria-orientation="horizontal"] {
+  height: 4px;
+  transition:height 0.1s;
+}
+[data-separator][aria-orientation="vertical"] {
+  width: 4px;
+  transition: width 0.1s;
+}
+[data-separator="hover"] { 
+  background: #666;
+}
+[data-separator="hover"][aria-orientation="horizontal"] {
+  height: 6px;
+}
+[data-separator="hover"][aria-orientation="vertical"] {
+  width: 6px;
+}
 /* Responsive adjustments */
 @media (max-width: 1200px) {
   .main-content {
