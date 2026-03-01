@@ -304,6 +304,7 @@ function App() {
             errorLines={errorLines}
             selectedError={selectedError}
             allowDrop
+            disabled={(!grammarText||grammarText==="")}
           />
           <div className="input-controls">
             <input

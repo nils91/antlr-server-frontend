@@ -8,7 +8,8 @@ const CodeEditor = ({
   errorLines = [],
   selectedError = null,
   allowDrop,
-  readOnly
+  readOnly,
+  disabled
 }) => {
   const textareaRef = useRef(null);
   const lineNumbersRef = useRef(null);
@@ -70,6 +71,7 @@ const CodeEditor = ({
         placeholder={placeholder}
         spellCheck={false}
         readOnly={readOnly}
+        disabled={disabled}
       />
     </div>
   );
