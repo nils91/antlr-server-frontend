@@ -31,60 +31,6 @@
   padding: 0 var(--spacing-sm);
 }
 
-.input-controls {
-  display: flex;
-  gap: var(--spacing-md);
-  align-items: center;
-  padding: var(--spacing-md);
-  background: var(--color-bg-secondary);
-  border-radius: var(--radius-md);
-  border: 1px solid var(--color-border-subtle);
-}
-
-.start-rule-input {
-  flex: 1;
-  padding: var(--spacing-sm) var(--spacing-md);
-  background: var(--color-bg-tertiary);
-  border: 1px solid var(--color-border-medium);
-  border-radius: var(--radius-md);
-  color: var(--color-text-primary);
-  font-size: 13px;
-  font-family: var(--font-mono);
-  transition: border-color var(--transition-fast);
-}
-
-.start-rule-input:focus {
-  border-color: var(--color-accent);
-}
-
-.start-rule-input::placeholder {
-  color: var(--color-text-tertiary);
-}
-
-.start-rule-input:disabled {
-  opacity: 0.5;
-  pointer-events: none;
-  filter: grayscale(100%);
-}
-
-.checkbox-label {
-  display: flex;
-  align-items: center;
-  gap: var(--spacing-sm);
-  cursor: pointer;
-  font-size: 13px;
-  font-weight: 500;
-  user-select: none;
-  white-space: nowrap;
-}
-
-.checkbox-label input[type="checkbox"] {
-  width: 16px;
-  height: 16px;
-  cursor: pointer;
-  accent-color: var(--color-accent);
-}
-
 /* Responsive adjustments */
 @media (max-width: 1200px) {
   .main-content {

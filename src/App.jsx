@@ -1,38 +1,39 @@
-import React, { useState, useEffect, useRef } from 'react';
-import Header from './components/Header';
-import CodeEditor from './components/CodeEditor';
-import ActionButton from './components/ActionButton';
-import Footer from './components/Footer';
-import api from './utils/api';
-import { useDebounce } from './hooks/useDebounce';
-import './App.css';
+import React, { useState, useEffect, useRef } from "react";
+import Header from "./components/Header";
+import CodeEditor from "./components/CodeEditor";
+import InputParseControls from "./components/InputParseControls";
+import ActionButton from "./components/ActionButton";
+import Footer from "./components/Footer";
+import api from "./utils/api";
+import { useDebounce } from "./hooks/useDebounce";
+import "./App.css";
 
 function App() {
   // State
   const [backendUrl, setBackendUrl] = useState(window.location.origin);
   const [grammars, setGrammars] = useState([]);
   const [selectedGrammar, setSelectedGrammar] = useState(null);
-  const [grammarText, setGrammarText] = useState('');
-  const [inputText, setInputText] = useState('');
-  const [startRule, setStartRule] = useState('');
+  const [grammarText, setGrammarText] = useState("");
+  const [inputText, setInputText] = useState("");
+  const [startRule, setStartRule] = useState("");
   const [autoSave, setAutoSave] = useState(false);
   const [autoParse, setAutoParse] = useState(false);
-  
+
   // Flags
   const [uploadFlag, setUploadFlag] = useState(false);
   const [compileFlag, setCompileFlag] = useState(false);
   const [parseFlag, setParseFlag] = useState(false);
-  
+
   // Status
-  const [refreshStatus, setRefreshStatus] = useState('idle');
-  const [uploadStatus, setUploadStatus] = useState('idle');
-  const [compileStatus, setCompileStatus] = useState('idle');
-  const [parseStatus, setParseStatus] = useState('idle');
-  
+  const [refreshStatus, setRefreshStatus] = useState("idle");
+  const [uploadStatus, setUploadStatus] = useState("idle");
+  const [compileStatus, setCompileStatus] = useState("idle");
+  const [parseStatus, setParseStatus] = useState("idle");
+
   // Parse results
   const [errors, setErrors] = useState([]);
-  const [lispTree, setLispTree] = useState('');
-  const [svgTree, setSvgTree] = useState('');
+  const [lispTree, setLispTree] = useState("");
+  const [svgTree, setSvgTree] = useState("");
   const [selectedError, setSelectedError] = useState(null);
 
   // Update API base URL when changed
@@ -53,7 +54,7 @@ function App() {
       if (uploadFlag) {
         await performUpload(false);
       }
-      if (selectedGrammar && selectedGrammar !== '__new__') {
+      if (selectedGrammar && selectedGrammar !== "__new__") {
         await performCompile(false);
       }
     }
@@ -68,7 +69,7 @@ function App() {
 
   // Refresh grammars list
   const refreshGrammars = async () => {
-    setRefreshStatus('loading');
+    setRefreshStatus("loading");
     try {
       const grammarNames = await api.listGrammars();
       const grammarsWithStatus = await Promise.all(
@@ -79,25 +80,25 @@ function App() {
           } catch {
             return { name, compiled: false };
           }
-        })
+        }),
       );
       setGrammars(grammarsWithStatus);
-      setRefreshStatus('success');
+      setRefreshStatus("success");
     } catch (error) {
-      console.error('Refresh failed:', error);
-      setRefreshStatus('error');
+      console.error("Refresh failed:", error);
+      setRefreshStatus("error");
     }
   };
 
   // Load grammar and associated data
   const loadGrammar = async (name) => {
-    if (name === '__new__') {
-      setGrammarText('');
-      setInputText('');
-      setStartRule('');
+    if (name === "__new__") {
+      setGrammarText("");
+      setInputText("");
+      setStartRule("");
       setErrors([]);
-      setLispTree('');
-      setSvgTree('');
+      setLispTree("");
+      setSvgTree("");
       return;
     }
 
@@ -126,17 +127,17 @@ function App() {
         setSvgTree(svg);
       } catch {}
     } catch (error) {
-      console.error('Failed to load grammar:', error);
+      console.error("Failed to load grammar:", error);
     }
   };
 
   // Perform upload
   const performUpload = async (force = false) => {
     if (!force && !uploadFlag) return;
-    
-    setUploadStatus('loading');
+
+    setUploadStatus("loading");
     try {
-      if (selectedGrammar === '__new__') {
+      if (selectedGrammar === "__new__") {
         const name = await api.uploadGrammar(grammarText);
         setSelectedGrammar(name);
         await refreshGrammars();
@@ -145,38 +146,38 @@ function App() {
         await refreshGrammars();
       }
       setUploadFlag(false);
-      setUploadStatus('success');
+      setUploadStatus("success");
     } catch (error) {
-      console.error('Upload failed:', error);
-      setUploadStatus('error');
+      console.error("Upload failed:", error);
+      setUploadStatus("error");
     }
   };
 
   // Perform compile
   const performCompile = async (force = false) => {
     if (!force && !compileFlag) return;
-    if (!selectedGrammar || selectedGrammar === '__new__') return;
+    if (!selectedGrammar || selectedGrammar === "__new__") return;
 
     if (uploadFlag) {
       await performUpload(false);
     }
 
-    setCompileStatus('loading');
+    setCompileStatus("loading");
     try {
       await api.compileGrammar(selectedGrammar);
       setCompileFlag(false);
-      setCompileStatus('success');
+      setCompileStatus("success");
       await refreshGrammars();
     } catch (error) {
-      console.error('Compile failed:', error);
-      setCompileStatus('error');
+      console.error("Compile failed:", error);
+      setCompileStatus("error");
     }
   };
 
   // Perform parse
   const performParse = async (force = false) => {
     if (!force && !parseFlag) return;
-    if (!selectedGrammar || selectedGrammar === '__new__') return;
+    if (!selectedGrammar || selectedGrammar === "__new__") return;
     if (!startRule.trim()) return;
 
     // Ensure grammar is uploaded and compiled
@@ -187,28 +188,28 @@ function App() {
       await performCompile(false);
     }
 
-    setParseStatus('loading');
+    setParseStatus("loading");
     try {
       await api.parse(selectedGrammar, startRule, inputText);
-      
+
       // Fetch results
       const [errorList, lisp, svg] = await Promise.all([
         api.getErrors(selectedGrammar).catch(() => []),
-        api.getTreeLisp(selectedGrammar).catch(() => ''),
-        api.getTreeSvg(selectedGrammar).catch(() => '')
+        api.getTreeLisp(selectedGrammar).catch(() => ""),
+        api.getTreeSvg(selectedGrammar).catch(() => ""),
       ]);
 
       setErrors(errorList);
       setLispTree(lisp);
       setSvgTree(svg);
       setParseFlag(false);
-      setParseStatus('success');
+      setParseStatus("success");
     } catch (error) {
-      console.error('Parse failed:', error);
+      console.error("Parse failed:", error);
       setErrors([]);
-      setLispTree('');
-      setSvgTree('');
-      setParseStatus('error');
+      setLispTree("");
+      setSvgTree("");
+      setParseStatus("error");
     }
   };
 
@@ -244,16 +245,16 @@ function App() {
   // Handle grammar deletion
   const handleDeleteGrammar = async (name) => {
     if (!confirm(`Delete grammar "${name}"?`)) return;
-    
+
     try {
       await api.deleteGrammar(name);
       await refreshGrammars();
       if (selectedGrammar === name) {
         setSelectedGrammar(null);
-        setGrammarText('');
+        setGrammarText("");
       }
     } catch (error) {
-      console.error('Delete failed:', error);
+      console.error("Delete failed:", error);
     }
   };
 
@@ -263,7 +264,7 @@ function App() {
   }, []);
 
   // Get error lines for highlighting
-  const errorLines = errors.map(e => e.line);
+  const errorLines = errors.map((e) => e.line);
 
   return (
     <div className="app">
@@ -304,35 +305,16 @@ function App() {
             errorLines={errorLines}
             selectedError={selectedError}
             allowDrop
-            disabled={(!grammarText||grammarText==="")}
+            disabled={!grammarText || grammarText === ""}
           />
-          <div className="input-controls">
-            <input
-              type="text"
-              className="start-rule-input"
-              value={startRule}
-              onChange={(e) => setStartRule(e.target.value)}
-              placeholder="Start rule..."
-              disabled={(!grammarText||grammarText==="")}
-            />
-            <ActionButton
-              onClick={() => performParse(false)}
-              onLongPress={() => performParse(true)}
-              status={parseStatus}
-              disabled={parseStatus === 'loading'}
-              variant="primary"
-            >
-              Parse
-            </ActionButton>
-            <label className="checkbox-label">
-              <input
-                type="checkbox"
-                checked={autoParse}
-                onChange={(e) => setAutoParse(e.target.checked)}
-              />
-              <span>Auto-parse</span>
-            </label>
-          </div>
+          <InputParseControls
+            startRule={startRule}
+            onStartRuleChange={setStartRule}
+            performParse={performParse}
+            autoParse={autoParse}
+            onAutoParseChange={setAutoParse}
+            disabled={!grammarText || grammarText === ""}
+          />
         </div>
       </div>
 
