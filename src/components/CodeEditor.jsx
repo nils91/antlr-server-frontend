@@ -53,8 +53,8 @@ const CodeEditor = ({
         onDrop:(e) => handleDrop(e)}:{};
 
   return (
-    <div className="code-editor">
-      <div className="line-numbers" ref={lineNumbersRef}>
+    <div className= {`code-editor ${disabled ? "is-disabled" : ""}`}>
+      <div className="line-numbers" aria-disabled={disabled} disabled={disabled} ref={lineNumbersRef}>
         {Array.from({ length: lineCount }, (_, i) => (
           <div key={i + 1} className={getLineClassName(i + 1)}>
             {i + 1}

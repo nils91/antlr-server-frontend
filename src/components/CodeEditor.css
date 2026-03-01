@@ -7,6 +7,12 @@
   border: 1px solid var(--color-border-subtle);
 }
 
+.code-editor.is-disabled {
+  opacity: 0.5;
+  pointer-events: none;
+  filter: grayscale(100%);
+}
+
 .line-numbers {
   background: var(--color-bg-tertiary);
   color: var(--color-text-tertiary);
@@ -22,7 +28,9 @@
 }
 
 .line-number {
-  transition: color var(--transition-fast), background var(--transition-fast);
+  transition:
+    color var(--transition-fast),
+    background var(--transition-fast);
 }
 
 .line-number.error-line {
