@@ -17,7 +17,7 @@ const CodeEditor = ({
 
   useEffect(() => {
     const lines = value.split("\n").length;
-    setLineCount(value);
+    setLineCount(lines);
   }, [value]);
 
   const handleScroll = () => {
