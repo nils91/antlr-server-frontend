@@ -27,6 +27,7 @@ function App() {
 
   // Status
   const [refreshStatus, setRefreshStatus] = useState("idle");
+  const [refreshIntervalMs, setRefreshIntervalMs] = useState(5000);
   const [uploadStatus, setUploadStatus] = useState("idle");
   const [compileStatus, setCompileStatus] = useState("idle");
   const [parseStatus, setParseStatus] = useState("idle");
@@ -37,10 +38,16 @@ function App() {
   const [svgTree, setSvgTree] = useState("");
   const [selectedError, setSelectedError] = useState(null);
 
-  // Update API base URL when changed
+  // Update API base URL when changed and reset refresh interval
   useEffect(() => {
     api.setBaseURL(backendUrl);
+    setRefreshIntervalMs(5000);
   }, [backendUrl]);
+
+  useEffect(() => {
+    const refreshTimer = setInterval(() => refreshGrammars(), refreshIntervalMs);
+    return () => clearInterval(refreshTimer);
+  }, [refreshIntervalMs]); 
 
   // Auto-upload after 10s of grammar edit
   const [triggerAutoUpload] = useDebounce(async () => {
@@ -70,25 +77,31 @@ function App() {
 
   // Refresh grammars list
   const refreshGrammars = async () => {
-    setRefreshStatus("loading");
-    try {
-      const grammarNamesList = await api.listGrammars();
-      console.log(grammarNamesList)
-      const grammarsWithStatus = await Promise.all(
-        grammarNamesList.map(async (name) => {
-          try {
-            const compiled = await api.grammarCompiled(name);
-            return { name, compiled };
-          } catch {
-            return { name, compiled: false };
-          }
-        }),
-      );
-      setGrammars(grammarsWithStatus);
-      setRefreshStatus("success");
-    } catch (error) {
-      console.error("Refresh failed:", error);
-      setRefreshStatus("error");
+    console.log("Refresh status: "+refreshStatus)
+    if (refreshStatus !== "loading") {
+      console.log("Refreshing")
+      setRefreshStatus("loading");
+      try {
+        const grammarNamesList = await api.listGrammars();
+        console.log(grammarNamesList);
+        const grammarsWithStatus = await Promise.all(
+          grammarNamesList.map(async (name) => {
+            try {
+              const compiled = await api.grammarCompiled(name);
+              return { name, compiled };
+            } catch {
+              return { name, compiled: false };
+            }
+          }),
+        );
+        setGrammars(grammarsWithStatus);
+        setRefreshStatus("success");
+        setRefreshIntervalMs(5000);
+      } catch (error) {
+        console.error("Refresh failed:", error);
+        setRefreshStatus("error");
+        setRefreshIntervalMs(30000);
+      }
     }
   };
 
