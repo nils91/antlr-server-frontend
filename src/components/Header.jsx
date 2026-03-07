@@ -1,6 +1,6 @@
-import React from 'react';
-import ActionButton from './ActionButton';
-import './Header.css';
+import React from "react";
+import ActionButton from "./ActionButton";
+import "./Header.css";
 
 const Header = ({
   backendUrl,
@@ -16,7 +16,7 @@ const Header = ({
   uploadStatus,
   onCompile,
   compileStatus,
-  onDelete
+  onDelete,
 }) => {
   return (
     <header className="app-header">
@@ -36,28 +36,34 @@ const Header = ({
         <div className="grammar-controls">
           <select
             className="grammar-select"
-            value={selectedGrammar || ''}
+            value={selectedGrammar || ""}
             onChange={(e) => onGrammarSelect(e.target.value)}
+            onMouseDown={(e) => {console.log(e); onRefresh();}}
           >
-            <option value="" disabled>Select grammar...</option>
+            <option value="" disabled>
+              Select grammar...
+            </option>
             {grammars.map((g) => (
               <option key={g.name} value={g.name}>
-                {g.compiled ? '● ' : '○ '}{g.name}
+                {g.compiled ? "● " : "○ "}
+                {g.name}
               </option>
             ))}
-            <option value="__new__" className="new-option">+ New...</option>
+            <option value="__new__" className="new-option">
+              + New...
+            </option>
           </select>
-          
+
           <ActionButton
             onClick={onRefresh}
             status={refreshStatus}
-            disabled={refreshStatus === 'loading'}
+            disabled={refreshStatus === "loading"}
           >
             ↻
           </ActionButton>
 
-          {selectedGrammar && selectedGrammar !== '__new__' && (
-            <button 
+          {selectedGrammar && selectedGrammar !== "__new__" && (
+            <button
               className="delete-button"
               onClick={() => onDelete(selectedGrammar)}
               title="Delete grammar"
@@ -84,16 +90,16 @@ const Header = ({
           onClick={onUpload}
           onLongPress={() => onUpload(true)}
           status={uploadStatus}
-          disabled={uploadStatus === 'loading'}
+          disabled={uploadStatus === "loading"}
         >
           Upload
         </ActionButton>
-        
+
         <ActionButton
           onClick={onCompile}
           onLongPress={() => onCompile(true)}
           status={compileStatus}
-          disabled={compileStatus === 'loading'}
+          disabled={compileStatus === "loading"}
         >
           Compile
         </ActionButton>

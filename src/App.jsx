@@ -19,15 +19,22 @@ function App() {
   const [startRule, setStartRule] = useState("");
   const [autoSave, setAutoSave] = useState(false);
   const [autoParse, setAutoParse] = useState(false);
+  const [uploadBlocked, setUploadBlocked] = useState(true);
+  const [lastGrammarChangeMs, setLastGrammarChangeMs] = useState(Date.now);
 
   // Flags
   const [uploadFlag, setUploadFlag] = useState(false);
+  const [generateFlag, setGenerateFlag] = useState(false);
   const [compileFlag, setCompileFlag] = useState(false);
   const [parseFlag, setParseFlag] = useState(false);
 
+  //timer intervals
+  const [refreshIntervalMs, setRefreshIntervalMs] = useState(5000);
+  const [uploadCheckIntervalMs, setUploadCheckIntervalMs] = useState(5000);
+
   // Status
   const [refreshStatus, setRefreshStatus] = useState("idle");
-  const [refreshIntervalMs, setRefreshIntervalMs] = useState(5000);
+
   const [uploadStatus, setUploadStatus] = useState("idle");
   const [compileStatus, setCompileStatus] = useState("idle");
   const [parseStatus, setParseStatus] = useState("idle");
@@ -42,44 +49,22 @@ function App() {
   useEffect(() => {
     api.setBaseURL(backendUrl);
     setRefreshIntervalMs(5000);
+    setUploadCheckIntervalMs(5000);
   }, [backendUrl]);
 
   useEffect(() => {
-    const refreshTimer = setInterval(() => refreshGrammars(), refreshIntervalMs);
+    const refreshTimer = setInterval(
+      () => refreshGrammars(),
+      refreshIntervalMs,
+    );
     return () => clearInterval(refreshTimer);
-  }, [refreshIntervalMs]); 
-
-  // Auto-upload after 10s of grammar edit
-  const [triggerAutoUpload] = useDebounce(async () => {
-    if (autoSave && uploadFlag) {
-      await performUpload(false);
-    }
-  }, 10000);
-
-  // Auto-compile after 50s of grammar edit
-  const [triggerAutoCompile] = useDebounce(async () => {
-    if (autoSave && compileFlag) {
-      if (uploadFlag) {
-        await performUpload(false);
-      }
-      if (selectedGrammar && selectedGrammar !== "__new__") {
-        await performCompile(false);
-      }
-    }
-  }, 50000);
-
-  // Auto-parse after 10s of input edit
-  const [triggerAutoParse] = useDebounce(async () => {
-    if (autoParse && parseFlag) {
-      await performParse(false);
-    }
-  }, 10000);
+  }, [refreshIntervalMs]);
 
   // Refresh grammars list
   const refreshGrammars = async () => {
-    console.log("Refresh status: "+refreshStatus)
+    console.log("Refresh status: " + refreshStatus);
     if (refreshStatus !== "loading") {
-      console.log("Refreshing")
+      console.log("Refreshing");
       setRefreshStatus("loading");
       try {
         const grammarNamesList = await api.listGrammars();
@@ -146,21 +131,46 @@ function App() {
     }
   };
 
+  useEffect(() => {
+    const uploadTimer = setInterval(() => checkUpload(), uploadCheckIntervalMs);
+    return () => clearInterval(uploadTimer);
+  }, [uploadCheckIntervalMs]);
+
+  const checkUpload = async (force = false) => {
+    console.log("Checking upload conditions")
+    const currentTimeMs = Date.now;
+    if (
+      (currentTimeMs - lastGrammarChangeMs >= 3000 &&
+        !uploadBlocked &&
+        uploadFlag) ||
+      force
+    ) {
+      setUploadBlocked(true);
+      try {
+        console.log("Attempting upload")
+        if (selectedGrammar === "__new__") {
+          const name = await api.uploadGrammar(grammarText);
+          setSelectedGrammar(name);
+          await refreshGrammars();
+        } else if (selectedGrammar) {
+          await api.overwriteGrammar(selectedGrammar, grammarText);
+          await refreshGrammars();
+        }
+        setUploadFlag(false);
+        setUploadCheckIntervalMs(5000);
+      } catch (error) {
+        setUploadCheckIntervalMs(30000);
+      }
+      setUploadBlocked(false);
+    }
+  };
+
   // Perform upload
   const performUpload = async (force = false) => {
     if (!force && !uploadFlag) return;
 
     setUploadStatus("loading");
     try {
-      if (selectedGrammar === "__new__") {
-        const name = await api.uploadGrammar(grammarText);
-        setSelectedGrammar(name);
-        await refreshGrammars();
-      } else if (selectedGrammar) {
-        await api.overwriteGrammar(selectedGrammar, grammarText);
-        await refreshGrammars();
-      }
-      setUploadFlag(false);
       setUploadStatus("success");
     } catch (error) {
       console.error("Upload failed:", error);
@@ -231,12 +241,16 @@ function App() {
   // Handle grammar text change
   const handleGrammarChange = (text) => {
     setGrammarText(text);
+    setUploadBlocked(true);
     setUploadFlag(true);
+    setGenerateFlag(true);
     setCompileFlag(true);
-    if (autoSave) {
-      triggerAutoUpload();
-      triggerAutoCompile();
-    }
+    setParseFlag(true);
+    setLastGrammarChangeMs(Date.now);
+    setTimeout(() => {
+      setUploadBlocked(false);
+      checkUpload();
+    }, 3000);
   };
 
   // Handle input text change
@@ -278,6 +292,12 @@ function App() {
     refreshGrammars();
   }, []);
 
+  const handleGrammarEditorKeyPress = (key) => {
+    if (key === "Enter") {
+      checkUpload(true);
+    }
+  };
+
   // Get error lines for highlighting
   const errorLines = errors.map((e) => e.line);
 
@@ -307,6 +327,7 @@ function App() {
               <CodeEditor
                 value={grammarText}
                 onChange={handleGrammarChange}
+                onKeyDown={handleGrammarEditorKeyPress}
                 placeholder="Enter your ANTLR grammar here..."
                 allowDrop
               />

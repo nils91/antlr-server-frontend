@@ -4,6 +4,7 @@ import "./CodeEditor.css";
 const CodeEditor = ({
   value,
   onChange,
+  onKeyDown,
   placeholder,
   errorLines = [],
   selectedError = null,
@@ -66,6 +67,7 @@ const CodeEditor = ({
         className="code-textarea"
         value={value}
         onChange={(e) => onChange(e.target.value)}
+        onKeyDown={(e) => onKeyDown(e.key)}
         {...dropRelatedAttr}
         onScroll={handleScroll}
         placeholder={placeholder}
