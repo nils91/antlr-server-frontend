@@ -41,7 +41,10 @@ class ApiService {
 
   async listGrammars() {
     const response = await axios.get(this.getFullURL('/api/grammars/list'));
-    return response.data.split('\n').filter(line => line.trim());
+    if(response.status==200){
+      return response.data;
+    }
+    return null;
   }
 
   async grammarExists(name) {

@@ -72,9 +72,10 @@ function App() {
   const refreshGrammars = async () => {
     setRefreshStatus("loading");
     try {
-      const grammarNames = await api.listGrammars();
+      const grammarNamesList = await api.listGrammars();
+      console.log(grammarNamesList)
       const grammarsWithStatus = await Promise.all(
-        grammarNames.map(async (name) => {
+        grammarNamesList.map(async (name) => {
           try {
             const compiled = await api.grammarCompiled(name);
             return { name, compiled };
