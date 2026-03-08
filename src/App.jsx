@@ -7,6 +7,7 @@ import ActionButton from "./components/ActionButton";
 import Footer from "./components/Footer";
 import api from "./utils/api";
 import { useDebounce } from "./hooks/useDebounce";
+import { useLatestValue } from "./hooks/useLatestValue";
 import "./App.css";
 
 function App() {
@@ -14,16 +15,20 @@ function App() {
   const [backendUrl, setBackendUrl] = useState(window.location.origin);
   const [grammars, setGrammars] = useState([]);
   const [selectedGrammar, setSelectedGrammar] = useState(null);
+  const selectedGrammarRef=useLatestValue(selectedGrammar);
   const [grammarText, setGrammarText] = useState("");
   const [inputText, setInputText] = useState("");
   const [startRule, setStartRule] = useState("");
   const [autoSave, setAutoSave] = useState(false);
   const [autoParse, setAutoParse] = useState(false);
   const [uploadBlocked, setUploadBlocked] = useState(true);
+  const uploadBlockedRef=useLatestValue(uploadBlocked);
   const [lastGrammarChangeMs, setLastGrammarChangeMs] = useState(Date.now);
+  const lastGrammarChangeMsRef=useLatestValue(lastGrammarChangeMs);
 
   // Flags
   const [uploadFlag, setUploadFlag] = useState(false);
+  const uploadFlagRef=useLatestValue(uploadFlag);
   const [generateFlag, setGenerateFlag] = useState(false);
   const [compileFlag, setCompileFlag] = useState(false);
   const [parseFlag, setParseFlag] = useState(false);
@@ -34,6 +39,7 @@ function App() {
 
   // Status
   const [refreshStatus, setRefreshStatus] = useState("idle");
+  const refreshStatusRef=useLatestValue(refreshStatus);
 
   const [uploadStatus, setUploadStatus] = useState("idle");
   const [compileStatus, setCompileStatus] = useState("idle");
@@ -62,8 +68,8 @@ function App() {
 
   // Refresh grammars list
   const refreshGrammars = async () => {
-    console.log("Refresh status: " + refreshStatus);
-    if (refreshStatus !== "loading") {
+    console.log("Refresh status: " + refreshStatusRef.current);
+    if (refreshStatusRef.current !== "loading") {
       console.log("Refreshing");
       setRefreshStatus("loading");
       try {
@@ -136,23 +142,30 @@ function App() {
     return () => clearInterval(uploadTimer);
   }, [uploadCheckIntervalMs]);
 
+  useEffect(() => {
+   console.log(lastGrammarChangeMs)
+  }, [lastGrammarChangeMs]);
+
+  useEffect(() => {
+   console.log(uploadFlag)
+  }, [uploadFlag]);
+
   const checkUpload = async (force = false) => {
-    console.log("Checking upload conditions")
-    const currentTimeMs = Date.now;
-    if (
-      (currentTimeMs - lastGrammarChangeMs >= 3000 &&
-        !uploadBlocked &&
-        uploadFlag) ||
-      force
-    ) {
+    const currentTimeMs = Date.now();
+    const lapsed = currentTimeMs - lastGrammarChangeMsRef.current;
+    console.log(
+      "Checking upload conditions " +
+         lapsed, uploadBlockedRef.current, uploadFlagRef.current, force 
+    );
+    if ((lapsed >= 2000 && !uploadBlockedRef.current && uploadFlagRef.current) || force) {
       setUploadBlocked(true);
       try {
-        console.log("Attempting upload")
-        if (selectedGrammar === "__new__") {
+        console.log("Attempting upload");
+        if (selectedGrammarRef.current === "__new__") {
           const name = await api.uploadGrammar(grammarText);
           setSelectedGrammar(name);
           await refreshGrammars();
-        } else if (selectedGrammar) {
+        } else if (selectedGrammarRef.current) {
           await api.overwriteGrammar(selectedGrammar, grammarText);
           await refreshGrammars();
         }
@@ -246,11 +259,11 @@ function App() {
     setGenerateFlag(true);
     setCompileFlag(true);
     setParseFlag(true);
-    setLastGrammarChangeMs(Date.now);
+    setLastGrammarChangeMs(Date.now());
     setTimeout(() => {
       setUploadBlocked(false);
       checkUpload();
-    }, 3000);
+    }, 2500);
   };
 
   // Handle input text change
@@ -293,6 +306,7 @@ function App() {
   }, []);
 
   const handleGrammarEditorKeyPress = (key) => {
+    console.log(key);
     if (key === "Enter") {
       checkUpload(true);
     }
