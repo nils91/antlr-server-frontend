@@ -17,6 +17,7 @@ function App() {
   const [selectedGrammar, setSelectedGrammar] = useState(null);
   const selectedGrammarRef=useLatestValue(selectedGrammar);
   const [grammarText, setGrammarText] = useState("");
+  const grammarTextRef=useLatestValue(grammarText);
   const [inputText, setInputText] = useState("");
   const [startRule, setStartRule] = useState("");
   const [autoSave, setAutoSave] = useState(false);
@@ -29,6 +30,8 @@ function App() {
   // Flags
   const [uploadFlag, setUploadFlag] = useState(false);
   const uploadFlagRef=useLatestValue(uploadFlag);
+  const [renameFlag, setRenameFlag] = useState(false);
+  const renameFlagRef=useLatestValue(renameFlag);
   const [generateFlag, setGenerateFlag] = useState(false);
   const [compileFlag, setCompileFlag] = useState(false);
   const [parseFlag, setParseFlag] = useState(false);
@@ -151,22 +154,22 @@ function App() {
   }, [uploadFlag]);
 
   const checkUpload = async (force = false) => {
+    const newGrammarName=getANTLRGrammarName(grammarTextRef.current);
+    if(newGrammarName&&selectedGrammarRef.current!==newGrammarName&&selectedGrammarRef.grammar!=="__new__"){
+      console.log(selectedGrammarRef.current,"->",newGrammarName);
+    }
     const currentTimeMs = Date.now();
     const lapsed = currentTimeMs - lastGrammarChangeMsRef.current;
-    console.log(
-      "Checking upload conditions " +
-         lapsed, uploadBlockedRef.current, uploadFlagRef.current, force 
-    );
     if ((lapsed >= 2000 && !uploadBlockedRef.current && uploadFlagRef.current) || force) {
       setUploadBlocked(true);
       try {
-        console.log("Attempting upload");
+        console.log("Attempting upload to ",selectedGrammarRef.current);
         if (selectedGrammarRef.current === "__new__") {
-          const name = await api.uploadGrammar(grammarText);
+          const name = await api.uploadGrammar(grammarTextRef.current);
           setSelectedGrammar(name);
           await refreshGrammars();
         } else if (selectedGrammarRef.current) {
-          await api.overwriteGrammar(selectedGrammar, grammarText);
+          await api.overwriteGrammar(selectedGrammar, grammarTextRef.current);
           await refreshGrammars();
         }
         setUploadFlag(false);
@@ -251,8 +254,18 @@ function App() {
     }
   };
 
+  function getANTLRGrammarName(text){
+    const match=text.match(/grammar\s*(.+?)(;|\s|$)/)
+    if(match&&match.length>1){
+      return match[1];
+    }
+    return null;
+  }
+
   // Handle grammar text change
   const handleGrammarChange = (text) => {
+    const newgrammarName=getANTLRGrammarName(text)
+    console.log(newgrammarName)
     setGrammarText(text);
     setUploadBlocked(true);
     setUploadFlag(true);
@@ -305,9 +318,9 @@ function App() {
     refreshGrammars();
   }, []);
 
-  const handleGrammarEditorKeyPress = (key) => {
-    console.log(key);
-    if (key === "Enter") {
+  const handleGrammarEditorKeyPress = (e) => {
+    if (e.shiftKey&& e.key === "Enter") {
+      e.preventDefault();
       checkUpload(true);
     }
   };

@@ -67,7 +67,7 @@ const CodeEditor = ({
         className="code-textarea"
         value={value}
         onChange={(e) => onChange(e.target.value)}
-        onKeyDown={(e) => onKeyDown(e.key)}
+        onKeyDown={(e) => onKeyDown(e)}
         {...dropRelatedAttr}
         onScroll={handleScroll}
         placeholder={placeholder}
