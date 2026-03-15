@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600&family=IBM+Plex+Sans:wght@400;500;600&display=swap');
+@import url("https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600&family=IBM+Plex+Sans:wght@400;500;600&display=swap");
 
 :root {
   /* Technical precision color palette */
@@ -6,47 +6,54 @@
   --color-bg-secondary: #161616;
   --color-bg-tertiary: #1e1e1e;
   --color-bg-elevated: #252525;
-  
+
   --color-border-subtle: #2a2a2a;
   --color-border-medium: #3a3a3a;
   --color-border-strong: #4a4a4a;
-  
+
   --color-text-primary: #e8e8e8;
   --color-text-secondary: #a0a0a0;
   --color-text-tertiary: #707070;
-  
+
   --color-accent: #3b82f6;
   --color-accent-hover: #2563eb;
   --color-accent-subtle: rgba(59, 130, 246, 0.1);
-  
+
   --color-success: #22c55e;
   --color-success-subtle: rgba(34, 197, 94, 0.1);
-  
+
   --color-error: #ef4444;
   --color-error-subtle: rgba(239, 68, 68, 0.1);
   --color-error-line: rgba(239, 68, 68, 0.08);
   --color-error-char: rgba(239, 68, 68, 0.2);
-  
+
   --color-warning: #f59e0b;
   --color-warning-subtle: rgba(245, 158, 11, 0.1);
-  
-  --font-mono: 'JetBrains Mono', 'Fira Code', 'Consolas', monospace;
-  --font-sans: 'IBM Plex Sans', -apple-system, system-ui, sans-serif;
-  
+  --color-warning-line: rgba(245, 158, 11, 0.08);
+  --color-warning-char: rgba(245, 158, 11, 0.2);
+
+  --color-info: rgb(11, 151, 245);
+  --color-info-subtle: rgba(11, 151, 245, 0.1);
+  --color-info-line: rgba(11, 151, 245, 0.08);
+  --color-info-char: rgba(11, 151, 245, 0.2);
+
+  --font-mono: "JetBrains Mono", "Fira Code", "Consolas", monospace;
+  --font-sans: "IBM Plex Sans", -apple-system, system-ui, sans-serif;
+
   --spacing-xs: 4px;
   --spacing-sm: 8px;
   --spacing-md: 12px;
   --spacing-lg: 16px;
   --spacing-xl: 24px;
-  
+
   --radius-sm: 4px;
   --radius-md: 6px;
   --radius-lg: 8px;
-  
+
   --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.3);
   --shadow-md: 0 2px 8px rgba(0, 0, 0, 0.4);
   --shadow-lg: 0 4px 16px rgba(0, 0, 0, 0.5);
-  
+
   --transition-fast: 120ms ease;
   --transition-base: 200ms ease;
 }
@@ -80,7 +87,9 @@ button {
   color: inherit;
 }
 
-input, textarea, select {
+input,
+textarea,
+select {
   font-family: inherit;
   color: inherit;
   border: none;

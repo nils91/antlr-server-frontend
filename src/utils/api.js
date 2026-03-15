@@ -31,7 +31,24 @@ class ApiService {
     );
     return response.data;
   }
-
+  async renameGrammar(name,newName) {
+    const response = await axios.put(
+      this.getFullURL(`/api/grammars/${encodeURIComponent(name)}/rename/${encodeURIComponent(newName)}`)
+    );
+    return response.data;
+  }
+async generateParser(name) {
+    const response = await axios.post(
+      this.getFullURL(`/api/grammars/${encodeURIComponent(name)}/generate`)
+    );
+    return response.data;
+  }
+  async getLastParserErrors(name) {
+    const response = await axios.get(
+      this.getFullURL(`/api/grammars/${encodeURIComponent(name)}/generated/errors`)
+    );
+    return response.data;
+  }
   async compileGrammar(name) {
     const response = await axios.get(
       this.getFullURL(`/api/grammars/${encodeURIComponent(name)}/compile/`)
